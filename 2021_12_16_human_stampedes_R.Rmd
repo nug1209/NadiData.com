@@ -19,4 +19,13 @@ df <- mutate(df, Date = as.Date(Date, format="%Y-%m-%d"))
 df$Year <- format(df$Date, format="%Y")
 head(df)
 ```
+```{r fig.align="center", echo=FALSE, fig.width=10}
+# fig.align="center", echo = FALSE,fig.width = 14
+ggplot(data=df, aes(y=Year, x=Number.of.Deaths)) + geom_bar(stat='identity')
+
+```
+```{r}
+# df <-data_frame[order(data_frame$c1),]
+df[order(-df$Number.of.Deaths),]
+```
 
