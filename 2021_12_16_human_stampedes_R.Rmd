@@ -25,7 +25,37 @@ ggplot(data=df, aes(y=Year, x=Number.of.Deaths)) + geom_bar(stat='identity')
 
 ```
 ```{r}
-# df <-data_frame[order(data_frame$c1),]
 df[order(-df$Number.of.Deaths),]
+```
+```{r}
+
+df_sum_ctr <- df %>%
+                group_by(Country) %>%
+                    summarise(sum = sum(Number.of.Deaths))
+
+head(df_sum_ctr[order(-df_sum_ctr$sum),])
+head(df_sum_ctr)
+
+```
+
+```{r}
+df_sum_yr <- df %>%
+                group_by(Year) %>%
+                    summarise(sum = sum(Number.of.Deaths))
+head(df_sum_yr[order(-df_sum_yr$sum),])
+head(df_sum_yr)
+
+```
+
+```{r}
+
+df_ov_500 <- df[df[,"Number.of.Deaths"]>500, ]
+ggplot(data=df_ov_500, aes(y=Country, x=Number.of.Deaths)) + geom_bar(stat='identity')
+# head(df_ov_500)
+```
+```{r}
+# unique(df[c("x1")])
+unique(df[c("Place")])
+
 ```
 
