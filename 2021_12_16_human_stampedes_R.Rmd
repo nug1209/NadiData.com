@@ -1,7 +1,11 @@
 ---
 title: "Human Stampedes"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
+
+Data analysis by Nugroho Budianggoro (@nugi1209) 16-12-2021
 
 ```{r}
 library(tidyverse)
