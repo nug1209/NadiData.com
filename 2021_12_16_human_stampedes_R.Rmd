@@ -17,10 +17,9 @@ df <- read.csv('https://raw.githubusercontent.com/nadidata/Blog/main/2021_12_16_
 ```{r}
 df <- mutate(df, Date = as.Date(Date, format="%Y-%m-%d"))
 df$Year <- format(df$Date, format="%Y")
-head(df)
+df
 ```
 ```{r fig.align="center", echo=FALSE, fig.width=10}
-# fig.align="center", echo = FALSE,fig.width = 14
 ggplot(data=df, aes(y=Year, x=Number.of.Deaths)) + geom_bar(stat='identity')
 
 ```
@@ -28,11 +27,17 @@ ggplot(data=df, aes(y=Year, x=Number.of.Deaths)) + geom_bar(stat='identity')
 df[order(-df$Number.of.Deaths),]
 ```
 ```{r}
+```
 
+
+```{r}
 df_sum_ctr <- df %>%
                 group_by(Country) %>%
                     summarise(sum = sum(Number.of.Deaths))
+```
 
+
+```{r}
 head(df_sum_ctr[order(-df_sum_ctr$sum),])
 head(df_sum_ctr)
 
@@ -57,5 +62,27 @@ ggplot(data=df_ov_500, aes(y=Country, x=Number.of.Deaths)) + geom_bar(stat='iden
 # unique(df[c("x1")])
 unique(df[c("Place")])
 
+```
+```{r}
+min(df$Year)
+```
+```{r fig.align="center", echo=FALSE, fig.width=10}
+df_count_ctr <- df %>%
+                group_by(Country) %>%
+                    tally()
+head(df_count_ctr[order(-df_count_ctr$n),])
+
+ggplot(data=df_count_ctr, aes(y=reorder(Country,n), x=n)) + geom_bar(stat='identity')
+```
+```{r fig.align="center", echo=FALSE, fig.width=10}
+df_count_yr <- df %>%
+                group_by(Year) %>%
+                    tally()
+# head(df_count_yr[order(-df_count_yr$n),])
+
+ggplot(data=df_count_yr, aes(y=reorder(Year,n), x=n)) + geom_bar(stat='identity')
+```
+```{r}
+df[df[,"Country"]=='Indonesia', ]
 ```
 
