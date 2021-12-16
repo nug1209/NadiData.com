@@ -174,7 +174,7 @@ matrix2 <- as.matrix(dtm2)
 words2 <- sort(rowSums(matrix2), decreasing=TRUE)
 df_words2 <- data.frame(word = names(words2), freq=words2)
 
-set.seed(13)
+set.seed(123)
 wordcloud(words=df_words2$word, freq=df_words2$freq, min.freq=1, max.words=30,
           random.order=FALSE, rot.per=0.35, colors = brewer.pal(8, "Dark2"))
 
@@ -182,7 +182,7 @@ wordcloud(words=df_words2$word, freq=df_words2$freq, min.freq=1, max.words=30,
 
 
 ```{r}
-sum(grepl("stadium", df$Description))
+sum(grepl("fire", df$Description))
 
 ```
 
