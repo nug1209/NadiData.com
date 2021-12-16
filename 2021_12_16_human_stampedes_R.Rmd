@@ -1,0 +1,22 @@
+---
+title: "Human Stampedes"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+```
+
+
+```{r}
+df <- read.csv('https://raw.githubusercontent.com/nadidata/Blog/main/2021_12_16_human_stampedes_DATASET.csv')
+
+```
+
+
+```{r}
+df <- mutate(df, Date = as.Date(Date, format="%Y-%m-%d"))
+df$Year <- format(df$Date, format="%Y")
+head(df)
+```
+
