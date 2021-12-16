@@ -9,6 +9,10 @@ Data analysis by Nugroho Budianggoro (@nugi1209) 16-12-2021
 
 ```{r}
 library(tidyverse)
+library(wordcloud)
+library(RColorBrewer)
+library(tm)
+library(wordcloud2)
 ```
 
 
@@ -89,4 +93,37 @@ ggplot(data=df_count_yr, aes(y=reorder(Year,n), x=n)) + geom_bar(stat='identity'
 ```{r}
 df[df[,"Country"]=='Indonesia', ]
 ```
+```{r}
+# CREATE WORD CLOUD
+text <- df$Description
+
+docs <- docs %>%
+            tm_map(removeNumbers) %>%
+            tm_map(removePunctuation) %>%
+            tm_map(stripWhitespace)
+docs <- tm_map(docs, content_transformer(tolower))
+docs <- tm_map(docs, removeWords, stopwords("english"))
+# docs <- tm_map(docs, removeWords,c("people", "stampede"))
+
+```
+```{r}
+dtm <- TermDocumentMatrix(docs)
+matrix <- as.matrix(dtm)
+words <- sort(rowSums(matrix), decreasing=TRUE)
+df_words <- data.frame(word = names(words), freq=words)
+
+df_words
+```
+
+```{r}
+set.seed(13)
+wordcloud(words=df_words$word, freq=df_words$freq, min.freq=1, max.words=30,
+          random.order=FALSE, rot.per=0.35, colors = brewer.pal(8, "Dark2"))
+```
+
+```{r}
+wordcloud2(data=df_words, size=1.6, color='random-dark')
+
+```
+
 
