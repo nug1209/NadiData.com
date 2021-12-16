@@ -97,6 +97,8 @@ df[df[,"Country"]=='Indonesia', ]
 # CREATE WORD CLOUD
 text <- df$Description
 
+docs <- Corpus(VectorSource(text))
+
 docs <- docs %>%
             tm_map(removeNumbers) %>%
             tm_map(removePunctuation) %>%
@@ -117,13 +119,70 @@ df_words
 
 ```{r}
 set.seed(13)
-wordcloud(words=df_words$word, freq=df_words$freq, min.freq=1, max.words=30,
+wordcloud(words=df_words$word, freq=df_words$freq, min.freq=1, max.words=100,
           random.order=FALSE, rot.per=0.35, colors = brewer.pal(8, "Dark2"))
 ```
 
 ```{r}
-wordcloud2(data=df_words, size=1.6, color='random-dark')
+
+stopwords2 <- c('killed',
+                'injured',
+                'stampede',
+                'least',
+                'crowd',
+                'died',
+                'one',
+                'police',
+                'trying',
+                'people',
+                'many',
+                'crushed',
+                'death',
+                'three',
+                'women',
+                'two',
+                'occured',
+                'others',
+                'fell',
+                'caused',
+                'leading',
+                'number',
+                'trampled',
+                'rushed',
+                'causing',
+                'day',
+                'near',
+                'deaths',
+                'get',
+                'tried',
+                'new',
+                'later',
+                'end',
+                'following',
+                'injuries',
+                'crush',
+                'person',
+                'tear',
+                'panic',
+                'india',
+                'occurred')
+
+docs2 <- tm_map(docs, removeWords,stopwords2)
+
+dtm2 <- TermDocumentMatrix(docs2)
+matrix2 <- as.matrix(dtm2)
+words2 <- sort(rowSums(matrix2), decreasing=TRUE)
+df_words2 <- data.frame(word = names(words2), freq=words2)
+
+set.seed(13)
+wordcloud(words=df_words2$word, freq=df_words2$freq, min.freq=1, max.words=30,
+          random.order=FALSE, rot.per=0.35, colors = brewer.pal(8, "Dark2"))
 
 ```
 
+
+```{r}
+sum(grepl("stadium", df$Description))
+
+```
 
