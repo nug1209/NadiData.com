@@ -1,3 +1,0 @@
-Dataset source:
-
-https://www.kaggle.com/shivamb/human-stampede
