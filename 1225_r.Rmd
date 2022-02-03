@@ -1,13 +1,17 @@
 ---
-title: "Human Stampedes"
-output:
-  html_document:
-    df_print: paged
+title: "1225"
+output: html_document
+editor_options: 
+  chunk_output_type: inline
 ---
 
-Data analysis by Nugroho Budianggoro (@nugi1209) 16-12-2021
+Data analysis of human stampedes data by Nugroho Budianggoro (@nugi1209) for his blog [NadiData.com](https://nadidata.com/) 16-12-2021 -- updated 02-02-2022
+
+Dataset source: [Shivam Bansal on Kaggle](https://www.kaggle.com/shivamb/human-stampede)
 
 ```{r}
+# Imports
+
 library(tidyverse)
 library(wordcloud)
 library(RColorBrewer)
@@ -15,86 +19,191 @@ library(tm)
 library(wordcloud2)
 ```
 
-
 ```{r}
-df <- read.csv('https://raw.githubusercontent.com/nadidata/Blog/main/2021_12_16_human_stampedes_DATASET.csv')
+# Read the dataset
+
+df <- read.csv('https://github.com/nugi1209/NadiData.com/raw/main/1225_dataset.csv')
 
 ```
 
-
 ```{r}
+# Convert the date column to Date format
+
 df <- mutate(df, Date = as.Date(Date, format="%Y-%m-%d"))
 df$Year <- format(df$Date, format="%Y")
-df
+head(df, n = 2)
 ```
 ```{r fig.align="center", echo=FALSE, fig.width=10}
-ggplot(data=df, aes(y=Year, x=Number.of.Deaths)) + geom_bar(stat='identity')
+# Plot number of death to year
 
-```
-```{r}
-df[order(-df$Number.of.Deaths),]
-```
-```{r}
+ggplot(data=df, aes(y=Year, x=Number.of.Deaths)) + geom_bar(stat='identity') + ggtitle("Number of Deaths per Year")
+
 ```
 
 
 ```{r}
+# Create data frame of grouped number of deaths by country
+
 df_sum_ctr <- df %>%
                 group_by(Country) %>%
                     summarise(sum = sum(Number.of.Deaths))
+
+df_sum_ctr <- df_sum_ctr %>%
+                rename(
+                    Number.of.Deaths = sum
+                )
+
+head(df_sum_ctr[order(-df_sum_ctr$Number.of.Deaths),])
+
+```
+
+```{r fig.align="center", echo=FALSE, fig.width=10}
+# Plot number of deaths per country
+
+ggplot(data=df_sum_ctr, aes(y=reorder(Country,Number.of.Deaths), x=Number.of.Deaths)) + geom_bar(stat='identity') + ggtitle("Number of Deaths per Country")
+
 ```
 
 
 ```{r}
-head(df_sum_ctr[order(-df_sum_ctr$sum),])
-head(df_sum_ctr)
+# Create data frame of group number of deaths by year
 
-```
-
-```{r}
 df_sum_yr <- df %>%
                 group_by(Year) %>%
                     summarise(sum = sum(Number.of.Deaths))
 head(df_sum_yr[order(-df_sum_yr$sum),])
-head(df_sum_yr)
+
+```
+
+```{r}
+# Create data frame of incidents involving more than 500 deaths
+
+df_ov_300 <- df[df[,"Number.of.Deaths"]>300, ]
+
+# Plot the data
+
+ggplot(data=df_ov_300, aes(y=reorder(Event.Name,Number.of.Deaths), x=Number.of.Deaths)) + geom_bar(stat='identity') + ggtitle("Highest Number of Deaths per Event")
+       
+```
+
+```{r}
+
+# Clean string from the place column so that we can conveniently process and compare it
+
+# Make a function to clean string
+
+clean_string <- function(string){
+    res <- tolower(string)
+    res <- stringr::str_replace_all(res, "[^a-zA-Z\\s]", " ")
+    res <- stringr::str_replace_all(res, "[\\s]+", " ")
+    str <- stringr::str_split(res, " ")[[1]]
+    indexes <- which(res == "")
+    if(length(indexes) > 0){
+        res <- res[-indexes]
+    }
+    return(res)
+}
+
+# Clean string of place column
+
+places <- clean_string(df$Place)
+
+# Get duplicate values of cleaned places and count the rows
+
+duplicated_places <- places[duplicated(places)]
+
+duplicated_places <- unique(duplicated_places)
+
+length(places[duplicated(places)])
+
+```
+```{r}
+# Create copy of master data frame and add the cleaned places column to it
+
+df1 <- df
+
+df1$Place.Cleaned <- places
+
+head(df1, n = 2)
 
 ```
 
 ```{r}
 
-df_ov_500 <- df[df[,"Number.of.Deaths"]>500, ]
-ggplot(data=df_ov_500, aes(y=Country, x=Number.of.Deaths)) + geom_bar(stat='identity')
-# head(df_ov_500)
-```
-```{r}
-# unique(df[c("x1")])
-unique(df[c("Place")])
+# Get all rows with duplicated cleaned places but remove the 'various' place
+
+df_dup_places <- df1[df1$Place.Cleaned %in% duplicated_places, ]
+
+df_dup_places <- df_dup_places[!(df_dup_places$Place.Cleaned=="various"),]
+
+head(df_dup_places, n = 2)
 
 ```
+
+
+
 ```{r}
 min(df$Year)
+
 ```
-```{r fig.align="center", echo=FALSE, fig.width=10}
+
+```{r}
+# Get count of incidents per country
+
 df_count_ctr <- df %>%
                 group_by(Country) %>%
                     tally()
-head(df_count_ctr[order(-df_count_ctr$n),])
 
-ggplot(data=df_count_ctr, aes(y=reorder(Country,n), x=n)) + geom_bar(stat='identity')
+# Rename incident count column
+
+df_count_ctr <- df_count_ctr %>%
+    rename(
+        Incident.Count = n
+    )
+head(df_count_ctr[order(-df_count_ctr$Incident.Count),])
+
 ```
+
 ```{r fig.align="center", echo=FALSE, fig.width=10}
+# Plot incident count per country
+
+ggplot(data=df_count_ctr, aes(y=reorder(Country,Incident.Count), x=Incident.Count)) + geom_bar(stat='identity') + ggtitle("Incident Count per Country")
+
+```
+
+```{r fig.align="center", echo=FALSE, fig.width=10}
+
+# Group incident count by year
+
 df_count_yr <- df %>%
                 group_by(Year) %>%
                     tally()
-# head(df_count_yr[order(-df_count_yr$n),])
 
-ggplot(data=df_count_yr, aes(y=reorder(Year,n), x=n)) + geom_bar(stat='identity')
+df_count_yr <- df_count_yr %>%
+                rename(
+                    Incident.Count = n
+                )
+head(df_count_yr)
+
 ```
+
+
+```{r fig.align="center", echo=FALSE, fig.width=10}
+
+# Plot incident count by year
+
+ggplot(data=df_count_yr, aes(y=Year, x=Incident.Count)) + geom_bar(stat='identity') + ggtitle("Incident Count per Year")
+```
+
 ```{r}
+
 df[df[,"Country"]=='Indonesia', ]
+
 ```
+
 ```{r}
-# CREATE WORD CLOUD
+
+# Create word cloud
 text <- df$Description
 
 docs <- Corpus(VectorSource(text))
@@ -108,16 +217,18 @@ docs <- tm_map(docs, removeWords, stopwords("english"))
 # docs <- tm_map(docs, removeWords,c("people", "stampede"))
 
 ```
+
 ```{r}
+
 dtm <- TermDocumentMatrix(docs)
 matrix <- as.matrix(dtm)
 words <- sort(rowSums(matrix), decreasing=TRUE)
 df_words <- data.frame(word = names(words), freq=words)
 
-df_words
 ```
 
 ```{r}
+
 set.seed(13)
 wordcloud(words=df_words$word, freq=df_words$freq, min.freq=1, max.words=100,
           random.order=FALSE, rot.per=0.35, colors = brewer.pal(8, "Dark2"))
@@ -180,9 +291,4 @@ wordcloud(words=df_words2$word, freq=df_words2$freq, min.freq=1, max.words=30,
 
 ```
 
-
-```{r}
-sum(grepl("fire", df$Description))
-
-```
 
